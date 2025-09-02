@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { Loader2, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/hooks/use-toast";
 
-export default function ResetPassword() {
+function ResetPasswordInner() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
@@ -22,7 +22,6 @@ export default function ResetPassword() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have the required parameters
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
     
@@ -31,7 +30,6 @@ export default function ResetPassword() {
       return;
     }
 
-    // Set the session
     const setSession = async () => {
       const { error } = await supabase.auth.setSession({
         access_token: accessToken,
@@ -182,5 +180,17 @@ export default function ResetPassword() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function ResetPassword() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    }>
+      <ResetPasswordInner />
+    </Suspense>
   );
 }
