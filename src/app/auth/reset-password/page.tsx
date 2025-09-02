@@ -22,7 +22,6 @@ function ResetPasswordContent() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have the required parameters
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
     
@@ -31,7 +30,6 @@ function ResetPasswordContent() {
       return;
     }
 
-    // Set the session
     const setSession = async () => {
       const { error } = await supabase.auth.setSession({
         access_token: accessToken,
