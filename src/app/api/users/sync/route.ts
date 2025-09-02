@@ -19,23 +19,17 @@ export async function POST(request: Request) {
     if (error || !data.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const u = data.user;
-    const role = (u.user_metadata as any)?.role ?? "STUDENT";
-    const verificationStatus = (u.user_metadata as any)?.verificationStatus ?? "PENDING";
 
     const user = await db.user.upsert({
       where: { email: u.email! },
       update: {
         name: (u.user_metadata as any)?.full_name ?? u.user_metadata?.name ?? null,
         image: (u.user_metadata as any)?.avatar_url ?? null,
-        role,
-        verificationStatus,
       },
       create: {
         email: u.email!,
         name: (u.user_metadata as any)?.full_name ?? u.user_metadata?.name ?? null,
         image: (u.user_metadata as any)?.avatar_url ?? null,
-        role,
-        verificationStatus,
       },
     });
 

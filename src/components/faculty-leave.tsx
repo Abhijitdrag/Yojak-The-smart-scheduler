@@ -13,8 +13,8 @@ import { toast } from "sonner";
 interface LeaveRecord {
   id: string;
   date: string;
-  status: "PRESENT" | "ABSENT" | "LEAVE";
-  notes?: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  reason?: string;
 }
 
 export default function FacultyLeave() {
@@ -32,7 +32,7 @@ export default function FacultyLeave() {
       const response = await fetch("/api/faculty/leave");
       if (response.ok) {
         const data = await response.json();
-        setLeaveRecords(data);
+        setLeaveRecords(data.requests || []);
       }
     } catch (error) {
       console.error("Error fetching leave records:", error);
@@ -81,12 +81,12 @@ export default function FacultyLeave() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "PRESENT":
-        return <Badge variant="default" className="bg-green-100 text-green-800">Present</Badge>;
-      case "ABSENT":
-        return <Badge variant="destructive">Absent</Badge>;
-      case "LEAVE":
-        return <Badge variant="secondary">Leave</Badge>;
+      case "PENDING":
+        return <Badge variant="outline">Pending</Badge>;
+      case "APPROVED":
+        return <Badge variant="default" className="bg-green-100 text-green-800">Approved</Badge>;
+      case "REJECTED":
+        return <Badge variant="destructive">Rejected</Badge>;
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
@@ -142,22 +142,22 @@ export default function FacultyLeave() {
         </CardContent>
       </Card>
 
-      {/* Leave Records */}
+      {/* Leave Requests */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Leave Records
+            Leave Requests
           </CardTitle>
           <CardDescription>
-            Your leave request history
+            Your leave requests and their statuses
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {leaveRecords.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                No leave records found
+                No leave requests found
               </p>
             ) : (
               leaveRecords.map((record) => (
@@ -173,9 +173,9 @@ export default function FacultyLeave() {
                           day: "numeric" 
                         })}
                       </p>
-                      {record.notes && (
+                      {record.reason && (
                         <p className="text-sm text-muted-foreground mt-1">
-                          {record.notes}
+                          {record.reason}
                         </p>
                       )}
                     </div>

@@ -8,19 +8,20 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSupabaseAuth } from "@/lib/supabase-auth";
 
-interface FacultyRow {
+interface StudentRow {
   id: string;
   email: string;
   name: string | null;
+  studentProfile?: { departmentId: string; semester: number } | null;
 }
 
-export default function FacultyPage() {
+export default function StudentsPage() {
   const { session, user, loading } = useSupabaseAuth();
   const router = useRouter();
-  const [rows, setRows] = useState<FacultyRow[]>([]);
+  const [rows, setRows] = useState<StudentRow[]>([]);
   const [departments, setDepartments] = useState<{id:string;name:string;code:string}[]>([]);
-  const [form, setForm] = useState({ email: "", name: "", departmentId: "" });
-  const [edit, setEdit] = useState<{ userId: string; name: string; departmentId: string } | null>(null);
+  const [form, setForm] = useState({ email: "", name: "", departmentId: "", semester: "" });
+  const [edit, setEdit] = useState<{ userId: string; name: string; departmentId: string; semester: string } | null>(null);
 
   useEffect(() => {
     if (loading) return;
@@ -33,33 +34,33 @@ export default function FacultyPage() {
   }, [session, loading, user, router]);
 
   const load = async () => {
-    const [fRes, dRes] = await Promise.all([
-      fetch("/api/admin/faculty", { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } }),
+    const [sRes, dRes] = await Promise.all([
+      fetch("/api/admin/students", { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } }),
       fetch("/api/admin/departments", { headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } }),
     ]);
-    if (fRes.ok) setRows((await fRes.json()).faculty);
+    if (sRes.ok) setRows((await sRes.json()).students);
     if (dRes.ok) setDepartments((await dRes.json()).departments);
   };
 
-  const createFaculty = async () => {
-    if (!form.email || !form.departmentId) return;
-    const res = await fetch("/api/admin/faculty", {
+  const createStudent = async () => {
+    if (!form.email || !form.departmentId || !form.semester) return;
+    const res = await fetch("/api/admin/students", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, semester: Number(form.semester) }),
     });
     if (res.ok) {
-      setForm({ email: "", name: "", departmentId: "" });
+      setForm({ email: "", name: "", departmentId: "", semester: "" });
       await load();
     }
   };
 
-  const updateFaculty = async () => {
+  const updateStudent = async () => {
     if (!edit) return;
-    const res = await fetch("/api/admin/faculty", {
+    const res = await fetch("/api/admin/students", {
       method: "PUT",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token ?? ""}` },
-      body: JSON.stringify({ userId: edit.userId, name: edit.name, departmentId: edit.departmentId })
+      body: JSON.stringify({ userId: edit.userId, name: edit.name, departmentId: edit.departmentId, semester: Number(edit.semester) })
     });
     if (res.ok) {
       setEdit(null);
@@ -67,8 +68,8 @@ export default function FacultyPage() {
     }
   };
 
-  const deleteFaculty = async (userId: string) => {
-    const res = await fetch(`/api/admin/faculty?userId=${userId}`, { method: "DELETE", headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
+  const deleteStudent = async (userId: string) => {
+    const res = await fetch(`/api/admin/students?userId=${userId}`, { method: "DELETE", headers: { Authorization: `Bearer ${session?.access_token ?? ""}` } });
     if (res.ok) await load();
   };
 
@@ -76,11 +77,11 @@ export default function FacultyPage() {
     <div className="container mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Faculty</CardTitle>
+          <CardTitle>Students</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2">
-            <Input placeholder="Faculty Email" value={form.email} onChange={(e)=>setForm({...form, email:e.target.value})} />
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-2">
+            <Input placeholder="Student Email" value={form.email} onChange={(e)=>setForm({...form, email:e.target.value})} />
             <Input placeholder="Name (optional)" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} />
             <Select onValueChange={(v)=>setForm({...form, departmentId:v})} value={form.departmentId}>
               <SelectTrigger>
@@ -92,16 +93,17 @@ export default function FacultyPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={createFaculty}>Add</Button>
+            <Input placeholder="Semester" value={form.semester} onChange={(e)=>setForm({...form, semester:e.target.value})} />
+            <Button onClick={createStudent}>Add</Button>
           </div>
           <div className="space-y-2">
             {rows.length === 0 ? (
-              <p>No faculty found.</p>
+              <p>No students found.</p>
             ) : (
               rows.map((r) => (
                 <div key={r.id} className="flex items-center justify-between border rounded p-3">
                   {edit?.userId === r.id ? (
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2">
                       <Input value={edit.name} onChange={(e)=>setEdit({ ...edit, name: e.target.value })} placeholder="Name" />
                       <Select value={edit.departmentId} onValueChange={(v)=>setEdit({ ...edit, departmentId: v })}>
                         <SelectTrigger>
@@ -113,8 +115,9 @@ export default function FacultyPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                      <Input value={edit.semester} onChange={(e)=>setEdit({ ...edit, semester: e.target.value })} placeholder="Semester" />
                       <div className="flex gap-2">
-                        <Button onClick={updateFaculty}>Save</Button>
+                        <Button onClick={updateStudent}>Save</Button>
                         <Button variant="ghost" onClick={()=>setEdit(null)}>Cancel</Button>
                       </div>
                     </div>
@@ -126,8 +129,8 @@ export default function FacultyPage() {
                   )}
                   {edit?.userId !== r.id && (
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" onClick={()=>setEdit({ userId: r.id, name: r.name || "", departmentId: departments[0]?.id || "" })}>Edit</Button>
-                      <Button variant="destructive" onClick={()=>deleteFaculty(r.id)}>Delete</Button>
+                      <Button variant="outline" onClick={()=>setEdit({ userId: r.id, name: r.name || "", departmentId: r.studentProfile?.departmentId || departments[0]?.id || "", semester: String(r.studentProfile?.semester || "") })}>Edit</Button>
+                      <Button variant="destructive" onClick={()=>deleteStudent(r.id)}>Delete</Button>
                     </div>
                   )}
                 </div>
@@ -139,3 +142,5 @@ export default function FacultyPage() {
     </div>
   );
 }
+
+

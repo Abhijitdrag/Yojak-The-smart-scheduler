@@ -41,6 +41,12 @@ enum AttendanceStatus {
   LEAVE
 }
 
+enum LeaveRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id                  String            @id @default(cuid())
   email               String            @unique
@@ -83,6 +89,7 @@ model FacultyProfile {
   attendanceRecords   Attendance[]
   nepCompliance       NEPCompliance[]
   syllabusProgress    SyllabusProgress[]
+  leaveRequests       LeaveRequest[]
   
   @@map("faculty_profiles")
 }
@@ -241,6 +248,22 @@ model SyllabusProgress {
 
   @@unique([facultyId, subjectId])
   @@map("syllabus_progress")
+}
+
+model LeaveRequest {
+  id          String             @id @default(cuid())
+  facultyId   String
+  date        DateTime
+  reason      String?
+  status      LeaveRequestStatus @default(PENDING)
+  createdAt   DateTime           @default(now())
+  reviewedAt  DateTime?
+  reviewedBy  String?
+
+  faculty     FacultyProfile     @relation(fields: [facultyId], references: [id])
+
+  @@unique([facultyId, date])
+  @@map("leave_requests")
 }
 
 // NextAuth.js Prisma Adapter models

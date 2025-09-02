@@ -29,10 +29,15 @@ export default function RealTimeNotifications() {
   useEffect(() => {
     if (!session || !user) return;
 
-    // Initialize socket connection to current origin by default
+    // Initialize socket connection to same-origin in dev to avoid CORS
     const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
-    const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL || origin || 'http://localhost:3001', {
-      path: '/api/socketio'
+    const preferredBase = origin || 'http://localhost:3000';
+    const envBase = process.env.NEXT_PUBLIC_SOCKET_URL;
+    const baseUrl = envBase && envBase.startsWith('http') ? envBase : preferredBase;
+    const newSocket = io(baseUrl, {
+      path: '/api/socketio',
+      transports: ['websocket'],
+      withCredentials: true
     });
     setSocket(newSocket);
 

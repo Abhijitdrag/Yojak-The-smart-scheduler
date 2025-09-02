@@ -64,8 +64,9 @@ export default function ApprovalsPage() {
   return (
     <div className="container mx-auto p-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex items-center justify-between">
           <CardTitle>Pending Approvals</CardTitle>
+          <Button variant="outline" onClick={() => router.push("/admin/leave-approvals")}>Leave Approvals</Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">

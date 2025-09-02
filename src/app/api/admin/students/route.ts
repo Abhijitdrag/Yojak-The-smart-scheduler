@@ -23,30 +23,32 @@ export async function GET(request: Request) {
   const ok = await requireAdmin(request);
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const facultyUsers = await db.user.findMany({
-    where: { role: "FACULTY" },
-    select: { id: true, email: true, name: true }
+  const students = await db.user.findMany({
+    where: { role: "STUDENT" },
+    select: { id: true, email: true, name: true, studentProfile: true }
   });
-
-  return NextResponse.json({ faculty: facultyUsers });
+  return NextResponse.json({ students });
 }
 
 export async function POST(request: Request) {
   const ok = await requireAdmin(request);
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { email, name, departmentId } = await request.json();
-  if (!email || !departmentId) return NextResponse.json({ error: "email and departmentId are required" }, { status: 400 });
+
+  const { email, name, departmentId, semester } = await request.json();
+  if (!email || !departmentId || !semester) {
+    return NextResponse.json({ error: "email, departmentId, semester are required" }, { status: 400 });
+  }
 
   const user = await db.user.upsert({
     where: { email },
-    update: { role: "FACULTY", verificationStatus: "APPROVED", name },
-    create: { email, name, role: "FACULTY", verificationStatus: "APPROVED" }
+    update: { role: "STUDENT", verificationStatus: "APPROVED", name },
+    create: { email, name, role: "STUDENT", verificationStatus: "APPROVED" }
   });
 
-  await db.facultyProfile.upsert({
+  await db.studentProfile.upsert({
     where: { userId: user.id },
-    update: { departmentId },
-    create: { userId: user.id, departmentId }
+    update: { departmentId, semester: Number(semester) },
+    create: { userId: user.id, departmentId, semester: Number(semester) }
   });
 
   return NextResponse.json({ userId: user.id });
@@ -56,18 +58,25 @@ export async function PUT(request: Request) {
   const ok = await requireAdmin(request);
   if (!ok) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { userId, name, departmentId } = await request.json();
+  const { userId, name, departmentId, semester } = await request.json();
   if (!userId) return NextResponse.json({ error: "userId is required" }, { status: 400 });
 
   if (name !== undefined) {
     await db.user.update({ where: { id: userId }, data: { name } });
   }
 
-  if (departmentId) {
-    await db.facultyProfile.upsert({
+  if (departmentId || semester !== undefined) {
+    await db.studentProfile.upsert({
       where: { userId },
-      update: { departmentId },
-      create: { userId, departmentId }
+      update: {
+        ...(departmentId ? { departmentId } : {}),
+        ...(semester !== undefined ? { semester: Number(semester) } : {}),
+      },
+      create: {
+        userId,
+        departmentId: departmentId!,
+        semester: Number(semester ?? 1)
+      }
     });
   }
 

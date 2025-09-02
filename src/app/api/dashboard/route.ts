@@ -37,6 +37,8 @@ export async function GET(request: Request) {
       pendingApprovals: 0,
       upcomingClasses: [],
       recentHolidays: [],
+      role,
+      verificationStatus: prismaUser.verificationStatus,
     };
 
     if (role === "ADMIN") {
@@ -76,30 +78,25 @@ export async function GET(request: Request) {
         }));
       }
     } else if (role === "STUDENT") {
-      const student = await db.studentProfile.findFirst({
-        where: { userId: prismaUser.id },
-        include: {
-          department: {
-            include: {
-              subjects: true,
-              timetableEntries: {
-                include: {
-                  subject: true,
-                  classroom: true,
-                  faculty: { include: { user: true } },
-                },
-              },
-            },
-          },
-        },
-      });
+      const student = await db.studentProfile.findFirst({ where: { userId: prismaUser.id } });
 
-      if (student && student.department) {
+      if (student) {
         const today = new Date();
         const dayOfWeek = today.getDay();
-        const todayClasses = student.department.timetableEntries.filter(entry => entry.dayOfWeek === dayOfWeek);
 
-        dashboardData.upcomingClasses = todayClasses.map(entry => ({
+        const entries = await db.timetableEntry.findMany({
+          where: {
+            dayOfWeek,
+            subject: { departmentId: student.departmentId },
+          },
+          include: {
+            subject: true,
+            classroom: true,
+            faculty: { include: { user: true } },
+          },
+        });
+
+        dashboardData.upcomingClasses = entries.map(entry => ({
           subject: entry.subject.name,
           time: `${entry.startTime.toLocaleTimeString()} - ${entry.endTime.toLocaleTimeString()}`,
           classroom: entry.classroom.name,

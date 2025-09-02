@@ -25,6 +25,8 @@ interface DashboardData {
   pendingApprovals: number;
   upcomingClasses: any[];
   recentHolidays: any[];
+  role?: string;
+  verificationStatus?: string;
 }
 
 function DashboardContent() {
@@ -66,8 +68,8 @@ function DashboardContent() {
   };
 
   const getRoleDashboard = () => {
-    const role = user?.user_metadata?.role || "STUDENT";
-    const verificationStatus = user?.user_metadata?.verificationStatus || "PENDING";
+    const role = dashboardData.role || (user?.user_metadata?.role || "STUDENT");
+    const verificationStatus = dashboardData.verificationStatus || (user?.user_metadata?.verificationStatus || "PENDING");
 
     if (verificationStatus === "PENDING") {
       return (
@@ -110,7 +112,7 @@ function DashboardContent() {
         <div>
           <h1 className="text-3xl font-bold">Smart Classroom Scheduler</h1>
           <p className="text-gray-600 mt-2">
-            Welcome back, {user?.user_metadata?.full_name || user?.email} ({user?.user_metadata?.role || "STUDENT"})
+            Welcome back, {user?.user_metadata?.full_name || user?.email} ({dashboardData.role || user?.user_metadata?.role || "STUDENT"})
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -223,12 +225,14 @@ function AdminDashboard({ data }: { data: DashboardData }) {
         onValueChange={(val) => {
           if (val === "faculty") router.push('/admin/faculty');
           if (val === "subjects") router.push('/admin/subjects');
+          if (val === "students") router.push('/admin/students');
         }}
       >
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="faculty">Faculty Management</TabsTrigger>
           <TabsTrigger value="subjects">Subject Management</TabsTrigger>
+          <TabsTrigger value="students">Student Management</TabsTrigger>
           <TabsTrigger value="timetable">Timetable</TabsTrigger>
           <TabsTrigger value="holidays">Holidays</TabsTrigger>
           <TabsTrigger value="syllabus">Syllabus Covered</TabsTrigger>

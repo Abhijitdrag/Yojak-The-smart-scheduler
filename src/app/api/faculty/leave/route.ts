@@ -11,25 +11,11 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const faculty = await db.facultyProfile.findFirst({
-      where: { userId: session.user.id }
-    });
+    const faculty = await db.facultyProfile.findFirst({ where: { userId: session.user.id } });
+    if (!faculty) return NextResponse.json({ requests: [] });
 
-    if (!faculty) {
-      return NextResponse.json({ error: "Faculty profile not found" }, { status: 404 });
-    }
-
-    const attendance = await db.attendance.findMany({
-      where: {
-        facultyId: faculty.id,
-        status: "LEAVE"
-      },
-      orderBy: {
-        date: "desc"
-      }
-    });
-
-    return NextResponse.json(attendance);
+    const requests = await db.leaveRequest.findMany({ where: { facultyId: faculty.id }, orderBy: { date: "desc" } });
+    return NextResponse.json({ requests });
   } catch (error) {
     console.error("Faculty leave fetch error:", error);
     return NextResponse.json({ error: "Failed to fetch leave requests" }, { status: 500 });
@@ -47,48 +33,16 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { date, reason } = body;
 
-    const faculty = await db.facultyProfile.findFirst({
-      where: { userId: session.user.id }
+    const faculty = await db.facultyProfile.findFirst({ where: { userId: session.user.id } });
+    if (!faculty) return NextResponse.json({ error: "Faculty profile not found" }, { status: 404 });
+
+    const requestRow = await db.leaveRequest.upsert({
+      where: { facultyId_date: { facultyId: faculty.id, date: new Date(date) } },
+      update: { reason, status: "PENDING" },
+      create: { facultyId: faculty.id, date: new Date(date), reason, status: "PENDING" }
     });
 
-    if (!faculty) {
-      return NextResponse.json({ error: "Faculty profile not found" }, { status: 404 });
-    }
-
-    // Check if attendance record already exists
-    const existingAttendance = await db.attendance.findUnique({
-      where: {
-        facultyId_date: {
-          facultyId: faculty.id,
-          date: new Date(date)
-        }
-      }
-    });
-
-    if (existingAttendance) {
-      // Update existing record
-      const attendance = await db.attendance.update({
-        where: { id: existingAttendance.id },
-        data: {
-          status: "LEAVE",
-          notes: reason
-        }
-      });
-
-      return NextResponse.json(attendance);
-    } else {
-      // Create new attendance record
-      const attendance = await db.attendance.create({
-        data: {
-          facultyId: faculty.id,
-          date: new Date(date),
-          status: "LEAVE",
-          notes: reason
-        }
-      });
-
-      return NextResponse.json(attendance);
-    }
+    return NextResponse.json(requestRow);
   } catch (error) {
     console.error("Faculty leave creation error:", error);
     return NextResponse.json({ error: "Failed to create leave request" }, { status: 500 });
