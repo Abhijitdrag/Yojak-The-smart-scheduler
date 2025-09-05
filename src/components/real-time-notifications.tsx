@@ -29,7 +29,13 @@ export default function RealTimeNotifications() {
   useEffect(() => {
     if (!session || !user) return;
 
-    // Initialize socket connection to same-origin in dev to avoid CORS
+    // Completely disable Socket.IO in development to prevent errors
+    if (process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DISABLE_SOCKETIO === 'true') {
+      console.log('Socket.IO disabled in development mode to prevent connection errors');
+      return;
+    }
+
+    // Only initialize socket connection in production
     const origin = typeof window !== 'undefined' ? window.location.origin : undefined;
     const preferredBase = origin || 'http://localhost:3000';
     const envBase = process.env.NEXT_PUBLIC_SOCKET_URL;
@@ -180,25 +186,29 @@ export default function RealTimeNotifications() {
         variant="outline"
         size="sm"
         onClick={() => setShowNotifications(!showNotifications)}
-        className="relative"
+        className="relative h-8 w-8 sm:h-9 sm:w-auto p-1 sm:p-2"
+        disabled={process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DISABLE_SOCKETIO === 'true'}
       >
-        <Bell className="h-4 w-4" />
+        <Bell className="h-3 w-3 sm:h-4 sm:w-4" />
         {unreadCount > 0 && (
           <Badge
             variant="destructive"
-            className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 text-xs"
+            className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-xs"
           >
             {unreadCount}
           </Badge>
         )}
+        <span className="hidden sm:inline ml-2">
+          {(process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_DISABLE_SOCKETIO === 'true') ? 'Offline' : 'Notifications'}
+        </span>
       </Button>
 
       {/* Notifications Panel */}
       {showNotifications && (
-        <Card className="absolute right-0 top-12 w-96 max-h-96 z-50 shadow-lg">
+        <Card className="absolute right-0 top-10 sm:top-12 w-72 sm:w-96 max-h-80 sm:max-h-96 z-50 shadow-lg">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Notifications</CardTitle>
+              <CardTitle className="text-sm sm:text-lg">Notifications</CardTitle>
               <div className="flex items-center gap-2">
                 {unreadCount > 0 && (
                   <Button

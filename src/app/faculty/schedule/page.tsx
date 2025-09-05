@@ -44,13 +44,13 @@ export default function FacultySchedulePage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-6">
       <Card>
-        <CardHeader>
-          <CardTitle>My Schedule</CardTitle>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">My Schedule</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-2 mb-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 mb-4">
             <Select value={form.subjectId} onValueChange={(v)=>setForm({...form, subjectId:v})}>
               <SelectTrigger><SelectValue placeholder="Subject" /></SelectTrigger>
               <SelectContent>
@@ -76,7 +76,7 @@ export default function FacultySchedulePage() {
             <Input type="time" value={form.start} onChange={(e)=>setForm({...form, start:e.target.value})} />
             <Input type="time" value={form.end} onChange={(e)=>setForm({...form, end:e.target.value})} />
           </div>
-          <Button onClick={create}>Add</Button>
+          <Button onClick={create} className="w-full sm:w-auto h-10 sm:h-11">Add</Button>
         </CardContent>
       </Card>
     </div>

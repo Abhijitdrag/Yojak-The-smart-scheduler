@@ -20,16 +20,33 @@ export async function POST(request: Request) {
 
     const u = data.user;
 
+    // Get existing user to preserve role and verificationStatus
+    const existingUser = await db.user.findUnique({ where: { email: u.email! } });
+
+    // Determine role for new users
+    let defaultRole = "STUDENT";
+    let defaultStatus = "PENDING";
+    
+    // Check if this should be an admin user
+    if (u.email?.includes("admin") || u.email?.includes("administrator")) {
+      defaultRole = "ADMIN";
+      defaultStatus = "APPROVED";
+    }
+
     const user = await db.user.upsert({
       where: { email: u.email! },
       update: {
         name: (u.user_metadata as any)?.full_name ?? u.user_metadata?.name ?? null,
         image: (u.user_metadata as any)?.avatar_url ?? null,
+        role: existingUser?.role ?? defaultRole, // Preserve existing role or use default
+        verificationStatus: existingUser?.verificationStatus ?? defaultStatus, // Preserve existing status or use default
       },
       create: {
         email: u.email!,
         name: (u.user_metadata as any)?.full_name ?? u.user_metadata?.name ?? null,
         image: (u.user_metadata as any)?.avatar_url ?? null,
+        role: defaultRole, // Use determined role for new users
+        verificationStatus: defaultStatus, // Use determined status for new users
       },
     });
 

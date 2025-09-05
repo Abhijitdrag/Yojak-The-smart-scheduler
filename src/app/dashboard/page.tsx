@@ -40,6 +40,7 @@ function DashboardContent() {
     upcomingClasses: [],
     recentHolidays: [],
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!session) return;
@@ -53,6 +54,7 @@ function DashboardContent() {
 
   const loadDashboardData = async () => {
     try {
+      setIsLoading(true);
       const response = await fetch("/api/dashboard", {
         headers: {
           Authorization: `Bearer ${session?.access_token ?? ""}`,
@@ -64,6 +66,8 @@ function DashboardContent() {
       }
     } catch (error) {
       console.error("Error loading dashboard data:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -106,18 +110,63 @@ function DashboardContent() {
     router.push("/auth/signin");
   };
 
+  if (isLoading) {
+    return (
+      <div className="container mx-auto p-4 sm:p-6">
+        <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="h-8 w-64 bg-gray-200 rounded animate-pulse mb-2"></div>
+            <div className="h-4 w-48 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-8 w-16 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="bg-white p-4 sm:p-6 rounded-lg border shadow-sm">
+              <div className="h-4 w-16 bg-gray-200 rounded animate-pulse mb-2"></div>
+              <div className="h-8 w-12 bg-gray-200 rounded animate-pulse"></div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white p-4 sm:p-6 rounded-lg border shadow-sm">
+            <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-4 bg-gray-200 rounded animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+          <div className="bg-white p-4 sm:p-6 rounded-lg border shadow-sm">
+            <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4"></div>
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-4 bg-gray-200 rounded animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="container mx-auto p-4 sm:p-6">
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Smart Classroom Scheduler</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold">Smart Classroom Scheduler</h1>
+          <p className="text-sm sm:text-base text-gray-600 mt-2">
             Welcome back, {user?.user_metadata?.full_name || user?.email} ({dashboardData.role || user?.user_metadata?.role || "STUDENT"})
           </p>
         </div>
         <div className="flex items-center gap-3">
           <RealTimeNotifications />
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
+          <Button variant="outline" size="sm" onClick={handleSignOut} className="text-xs sm:text-sm">
             Sign out
           </Button>
         </div>
@@ -176,45 +225,45 @@ function AdminDashboard({ data }: { data: DashboardData }) {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Subjects</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <Card className="p-3 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Subjects</CardTitle>
+            <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.totalSubjects}</div>
+          <CardContent className="p-0 pt-2">
+            <div className="text-lg sm:text-2xl font-bold">{data.totalSubjects}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Faculty</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-3 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Faculty</CardTitle>
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.totalFaculty}</div>
+          <CardContent className="p-0 pt-2">
+            <div className="text-lg sm:text-2xl font-bold">{data.totalFaculty}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-3 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Students</CardTitle>
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.totalStudents}</div>
+          <CardContent className="p-0 pt-2">
+            <div className="text-lg sm:text-2xl font-bold">{data.totalStudents}</div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-3 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+            <CardTitle className="text-xs sm:text-sm font-medium">Pending Approvals</CardTitle>
+            <AlertTriangle className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{data.pendingApprovals}</div>
+          <CardContent className="p-0 pt-2">
+            <div className="text-lg sm:text-2xl font-bold">{data.pendingApprovals}</div>
           </CardContent>
         </Card>
       </div>
@@ -228,14 +277,14 @@ function AdminDashboard({ data }: { data: DashboardData }) {
           if (val === "students") router.push('/admin/students');
         }}
       >
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="faculty">Faculty Management</TabsTrigger>
-          <TabsTrigger value="subjects">Subject Management</TabsTrigger>
-          <TabsTrigger value="students">Student Management</TabsTrigger>
-          <TabsTrigger value="timetable">Timetable</TabsTrigger>
-          <TabsTrigger value="holidays">Holidays</TabsTrigger>
-          <TabsTrigger value="syllabus">Syllabus Covered</TabsTrigger>
+        <TabsList className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 w-full">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+          <TabsTrigger value="faculty" className="text-xs sm:text-sm">Faculty</TabsTrigger>
+          <TabsTrigger value="subjects" className="text-xs sm:text-sm">Subjects</TabsTrigger>
+          <TabsTrigger value="students" className="text-xs sm:text-sm">Students</TabsTrigger>
+          <TabsTrigger value="timetable" className="text-xs sm:text-sm">Timetable</TabsTrigger>
+          <TabsTrigger value="holidays" className="text-xs sm:text-sm">Holidays</TabsTrigger>
+          <TabsTrigger value="syllabus" className="text-xs sm:text-sm">Syllabus</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-4">
@@ -243,39 +292,39 @@ function AdminDashboard({ data }: { data: DashboardData }) {
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Button variant="outline" className="h-20 flex-col" onClick={() => router.push('/admin/faculty')}>
-                <Users className="h-6 w-6 mb-2" />
-                <span className="text-sm">Manage Faculty</span>
+            <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+              <Button variant="outline" className="h-16 sm:h-20 flex-col p-2" onClick={() => router.push('/admin/faculty')}>
+                <Users className="h-4 w-4 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-xs sm:text-sm text-center">Manage Faculty</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col" onClick={() => router.push('/admin/subjects')}>
-                <BookOpen className="h-6 w-6 mb-2" />
-                <span className="text-sm">Manage Subjects</span>
+              <Button variant="outline" className="h-16 sm:h-20 flex-col p-2" onClick={() => router.push('/admin/subjects')}>
+                <BookOpen className="h-4 w-4 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-xs sm:text-sm text-center">Manage Subjects</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col" onClick={() => router.push('/admin/departments')}>
-                <CheckCircle className="h-6 w-6 mb-2" />
-                <span className="text-sm">Manage Departments</span>
+              <Button variant="outline" className="h-16 sm:h-20 flex-col p-2" onClick={() => router.push('/admin/departments')}>
+                <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-xs sm:text-sm text-center">Manage Departments</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col" onClick={() => router.push('/admin/approvals')}>
-                <CheckCircle className="h-6 w-6 mb-2" />
-                <span className="text-sm">Approvals</span>
+              <Button variant="outline" className="h-16 sm:h-20 flex-col p-2" onClick={() => router.push('/admin/approvals')}>
+                <CheckCircle className="h-4 w-4 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-xs sm:text-sm text-center">Approvals</span>
               </Button>
               <Button 
                 variant="outline" 
-                className="h-20 flex-col"
+                className="h-16 sm:h-20 flex-col p-2"
                 onClick={handleGenerateTimetable}
                 disabled={isGenerating}
               >
                 {isGenerating ? (
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-2" />
+                  <div className="h-4 w-4 sm:h-6 sm:w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mb-1 sm:mb-2" />
                 ) : (
-                  <Calendar className="h-6 w-6 mb-2" />
+                  <Calendar className="h-4 w-4 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
                 )}
-                <span className="text-sm">Generate Timetable</span>
+                <span className="text-xs sm:text-sm text-center">{isGenerating ? "Generating..." : "Generate Timetable"}</span>
               </Button>
-              <Button variant="outline" className="h-20 flex-col" onClick={() => router.push('/faculty/schedule')}>
-                <AlertTriangle className="h-6 w-6 mb-2" />
-                <span className="text-sm">Faculty Schedule</span>
+              <Button variant="outline" className="h-16 sm:h-20 flex-col p-2" onClick={() => router.push('/faculty/schedule')}>
+                <AlertTriangle className="h-4 w-4 sm:h-6 sm:w-6 mb-1 sm:mb-2" />
+                <span className="text-xs sm:text-sm text-center">Faculty Schedule</span>
               </Button>
             </CardContent>
           </Card>
@@ -299,48 +348,48 @@ function AdminDashboard({ data }: { data: DashboardData }) {
 
 function FacultyDashboard({ data }: { data: DashboardData }) {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Weekly Hours</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <Card className="p-3 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+            <CardTitle className="text-xs sm:text-sm font-medium">Weekly Hours</CardTitle>
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">24 / 40</div>
+          <CardContent className="p-0 pt-2">
+            <div className="text-lg sm:text-2xl font-bold">24 / 40</div>
             <p className="text-xs text-muted-foreground">This week</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Classes</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-3 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+            <CardTitle className="text-xs sm:text-sm font-medium">Today's Classes</CardTitle>
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4</div>
+          <CardContent className="p-0 pt-2">
+            <div className="text-lg sm:text-2xl font-bold">{data.upcomingClasses.length}</div>
             <p className="text-xs text-muted-foreground">Scheduled</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Syllabus Progress</CardTitle>
-            <CheckCircle className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-3 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+            <CardTitle className="text-xs sm:text-sm font-medium">Syllabus Progress</CardTitle>
+            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">68%</div>
+          <CardContent className="p-0 pt-2">
+            <div className="text-lg sm:text-2xl font-bold">68%</div>
             <p className="text-xs text-muted-foreground">Completed</p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="schedule" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="schedule">My Schedule</TabsTrigger>
-          <TabsTrigger value="subjects">My Subjects</TabsTrigger>
-          <TabsTrigger value="attendance">Attendance</TabsTrigger>
-          <TabsTrigger value="leave">Request Leave</TabsTrigger>
+        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full">
+          <TabsTrigger value="schedule" className="text-xs sm:text-sm">My Schedule</TabsTrigger>
+          <TabsTrigger value="subjects" className="text-xs sm:text-sm">My Subjects</TabsTrigger>
+          <TabsTrigger value="attendance" className="text-xs sm:text-sm">Attendance</TabsTrigger>
+          <TabsTrigger value="leave" className="text-xs sm:text-sm">Request Leave</TabsTrigger>
         </TabsList>
         
         <TabsContent value="schedule" className="space-y-4">
@@ -349,18 +398,25 @@ function FacultyDashboard({ data }: { data: DashboardData }) {
               <CardTitle>Today's Schedule</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {data.upcomingClasses.map((classItem, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{classItem.subject}</p>
-                      <p className="text-sm text-gray-600">{classItem.time} - {classItem.classroom}</p>
-                    </div>
-                    <Badge variant={classItem.type === "LAB" ? "destructive" : "secondary"}>
-                      {classItem.type}
-                    </Badge>
+              <div className="space-y-3">
+                {data.upcomingClasses.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-sm">No classes scheduled for today</p>
                   </div>
-                ))}
+                ) : (
+                  data.upcomingClasses.map((classItem, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-2">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm sm:text-base">{classItem.subject}</p>
+                        <p className="text-xs sm:text-sm text-gray-600">{classItem.time} - {classItem.classroom}</p>
+                      </div>
+                      <Badge variant={classItem.type === "LAB" ? "destructive" : "secondary"} className="text-xs w-fit">
+                        {classItem.type}
+                      </Badge>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
@@ -380,37 +436,37 @@ function FacultyDashboard({ data }: { data: DashboardData }) {
 
 function StudentDashboard({ data }: { data: DashboardData }) {
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Classes</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <Card className="p-3 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+            <CardTitle className="text-xs sm:text-sm font-medium">Today's Classes</CardTitle>
+            <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">6</div>
+          <CardContent className="p-0 pt-2">
+            <div className="text-lg sm:text-2xl font-bold">{data.upcomingClasses.length}</div>
             <p className="text-xs text-muted-foreground">Scheduled</p>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Current Semester</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+        <Card className="p-3 sm:p-6">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+            <CardTitle className="text-xs sm:text-sm font-medium">Current Semester</CardTitle>
+            <BookOpen className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">4th</div>
+          <CardContent className="p-0 pt-2">
+            <div className="text-lg sm:text-2xl font-bold">4th</div>
             <p className="text-xs text-muted-foreground">In progress</p>
           </CardContent>
         </Card>
       </div>
 
       <Tabs defaultValue="timetable" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="timetable">My Timetable</TabsTrigger>
-          <TabsTrigger value="subjects">Subjects</TabsTrigger>
-          <TabsTrigger value="labs">Lab Schedule</TabsTrigger>
-          <TabsTrigger value="alerts">Alerts</TabsTrigger>
+        <TabsList className="grid grid-cols-2 sm:grid-cols-4 w-full">
+          <TabsTrigger value="timetable" className="text-xs sm:text-sm">My Timetable</TabsTrigger>
+          <TabsTrigger value="subjects" className="text-xs sm:text-sm">Subjects</TabsTrigger>
+          <TabsTrigger value="labs" className="text-xs sm:text-sm">Lab Schedule</TabsTrigger>
+          <TabsTrigger value="alerts" className="text-xs sm:text-sm">Alerts</TabsTrigger>
         </TabsList>
         
         <TabsContent value="timetable" className="space-y-4">
@@ -419,19 +475,26 @@ function StudentDashboard({ data }: { data: DashboardData }) {
               <CardTitle>Today's Timetable</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {data.upcomingClasses.map((classItem, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{classItem.subject}</p>
-                      <p className="text-sm text-gray-600">{classItem.time} - {classItem.classroom}</p>
-                      <p className="text-xs text-gray-500">{classItem.faculty}</p>
-                    </div>
-                    <Badge variant={classItem.type === "LAB" ? "destructive" : "secondary"}>
-                      {classItem.type}
-                    </Badge>
+              <div className="space-y-3">
+                {data.upcomingClasses.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-sm">No classes scheduled for today</p>
                   </div>
-                ))}
+                ) : (
+                  data.upcomingClasses.map((classItem, index) => (
+                    <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg gap-2">
+                      <div className="flex-1">
+                        <p className="font-medium text-sm sm:text-base">{classItem.subject}</p>
+                        <p className="text-xs sm:text-sm text-gray-600">{classItem.time} - {classItem.classroom}</p>
+                        <p className="text-xs text-gray-500">{classItem.faculty}</p>
+                      </div>
+                      <Badge variant={classItem.type === "LAB" ? "destructive" : "secondary"} className="text-xs w-fit">
+                        {classItem.type}
+                      </Badge>
+                    </div>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>

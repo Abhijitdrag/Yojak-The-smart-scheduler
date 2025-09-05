@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAuth } from "@/lib/supabase-server";
 import { db } from "@/lib/db";
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "FACULTY") {
+  const { user } = await requireAuth(request, "FACULTY");
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const { subjectId, classroomId, dayOfWeek, start, end } = await request.json();
@@ -13,7 +12,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  const faculty = await db.facultyProfile.findFirst({ where: { userId: session.user.id } });
+  const faculty = await db.facultyProfile.findFirst({ where: { userId: user.id } });
   if (!faculty) return NextResponse.json({ error: "Faculty profile not found" }, { status: 404 });
 
   const today = new Date();
@@ -31,7 +30,7 @@ export async function POST(request: Request) {
       startTime,
       endTime,
       classType: "LECTURE",
-      createdById: session.user.id,
+      createdById: user.id,
     }
   });
 

@@ -23,10 +23,16 @@ export function AuthGuard({ children, requiredRole }: AuthGuardProps) {
   // Show loading spinner while checking authentication
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="text-lg">Loading...</p>
+          <div className="relative">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+            <div className="absolute inset-0 h-12 w-12 rounded-full border-2 border-blue-200"></div>
+          </div>
+          <div className="text-center">
+            <p className="text-lg font-medium text-gray-900">Loading Dashboard</p>
+            <p className="text-sm text-gray-600 mt-1">Please wait while we prepare your data...</p>
+          </div>
         </div>
       </div>
     );

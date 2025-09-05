@@ -74,13 +74,13 @@ export default function StudentsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Students</CardTitle>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">Students</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="mb-4 grid grid-cols-1 md:grid-cols-5 gap-2">
+        <CardContent className="p-4 sm:p-6">
+          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3">
             <Input placeholder="Student Email" value={form.email} onChange={(e)=>setForm({...form, email:e.target.value})} />
             <Input placeholder="Name (optional)" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} />
             <Select onValueChange={(v)=>setForm({...form, departmentId:v})} value={form.departmentId}>
@@ -94,16 +94,16 @@ export default function StudentsPage() {
               </SelectContent>
             </Select>
             <Input placeholder="Semester" value={form.semester} onChange={(e)=>setForm({...form, semester:e.target.value})} />
-            <Button onClick={createStudent}>Add</Button>
+            <Button onClick={createStudent} className="h-10 sm:h-11">Add</Button>
           </div>
           <div className="space-y-2">
             {rows.length === 0 ? (
-              <p>No students found.</p>
+              <p className="text-sm sm:text-base text-center py-4">No students found.</p>
             ) : (
               rows.map((r) => (
-                <div key={r.id} className="flex items-center justify-between border rounded p-3">
+                <div key={r.id} className="flex flex-col sm:flex-row sm:items-center justify-between border rounded p-3 gap-2 sm:gap-4">
                   {edit?.userId === r.id ? (
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2">
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                       <Input value={edit.name} onChange={(e)=>setEdit({ ...edit, name: e.target.value })} placeholder="Name" />
                       <Select value={edit.departmentId} onValueChange={(v)=>setEdit({ ...edit, departmentId: v })}>
                         <SelectTrigger>
@@ -117,20 +117,20 @@ export default function StudentsPage() {
                       </Select>
                       <Input value={edit.semester} onChange={(e)=>setEdit({ ...edit, semester: e.target.value })} placeholder="Semester" />
                       <div className="flex gap-2">
-                        <Button onClick={updateStudent}>Save</Button>
-                        <Button variant="ghost" onClick={()=>setEdit(null)}>Cancel</Button>
+                        <Button onClick={updateStudent} size="sm">Save</Button>
+                        <Button variant="ghost" onClick={()=>setEdit(null)} size="sm">Cancel</Button>
                       </div>
                     </div>
                   ) : (
                     <div className="flex-1">
-                      <div className="font-medium">{r.name || r.email}</div>
-                      <div className="text-sm text-gray-600">{r.email}</div>
+                      <div className="font-medium text-sm sm:text-base">{r.name || r.email}</div>
+                      <div className="text-xs sm:text-sm text-gray-600">{r.email}</div>
                     </div>
                   )}
                   {edit?.userId !== r.id && (
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" onClick={()=>setEdit({ userId: r.id, name: r.name || "", departmentId: r.studentProfile?.departmentId || departments[0]?.id || "", semester: String(r.studentProfile?.semester || "") })}>Edit</Button>
-                      <Button variant="destructive" onClick={()=>deleteStudent(r.id)}>Delete</Button>
+                      <Button variant="outline" onClick={()=>setEdit({ userId: r.id, name: r.name || "", departmentId: r.studentProfile?.departmentId || departments[0]?.id || "", semester: String(r.studentProfile?.semester || "") })} size="sm" className="text-xs sm:text-sm">Edit</Button>
+                      <Button variant="destructive" onClick={()=>deleteStudent(r.id)} size="sm" className="text-xs sm:text-sm">Delete</Button>
                     </div>
                   )}
                 </div>

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAuth } from "@/lib/supabase-server";
 import { db } from "@/lib/db";
 
 interface TimetableConstraint {
@@ -19,9 +18,9 @@ interface SchedulingInput {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const { user } = await requireAuth(request, "ADMIN");
     
-    if (!session || session.user.role !== "ADMIN") {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

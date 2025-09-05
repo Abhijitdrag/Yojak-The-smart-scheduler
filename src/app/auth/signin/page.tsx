@@ -160,15 +160,15 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 sm:p-6">
       <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Smart Classroom Scheduler</CardTitle>
-          <CardDescription>
+        <CardHeader className="text-center p-4 sm:p-6">
+          <CardTitle className="text-xl sm:text-2xl font-bold">Smart Classroom Scheduler</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
             Sign in to access the timetable management system
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           {/* Google Sign In Button */}
           <Button
             onClick={handleGoogleSignIn}
@@ -220,9 +220,9 @@ export default function SignIn() {
 
           <Tabs defaultValue="signin" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              <TabsTrigger value="reset">Reset</TabsTrigger>
+              <TabsTrigger value="signin" className="text-xs sm:text-sm">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-xs sm:text-sm">Sign Up</TabsTrigger>
+              <TabsTrigger value="reset" className="text-xs sm:text-sm">Reset</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin" className="space-y-4">
@@ -264,14 +264,14 @@ export default function SignIn() {
                     </Button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button type="submit" className="w-full h-10 sm:h-11" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
+                      <span className="text-sm sm:text-base">Signing in...</span>
                     </>
                   ) : (
-                    "Sign In"
+                    <span className="text-sm sm:text-base">Sign In</span>
                   )}
                 </Button>
               </form>

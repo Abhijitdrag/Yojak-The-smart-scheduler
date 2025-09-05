@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAuth } from "@/lib/supabase-server";
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") {
+export async function GET(request: Request) {
+  const { user } = await requireAuth(request, "ADMIN");
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -17,8 +16,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "ADMIN") {
+  const { user } = await requireAuth(request, "ADMIN");
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -32,7 +31,7 @@ export async function POST(request: Request) {
     data: {
       status: action === "APPROVE" ? "APPROVED" : "REJECTED",
       reviewedAt: new Date(),
-      reviewedBy: session.user.id,
+      reviewedBy: user.id,
     }
   });
 

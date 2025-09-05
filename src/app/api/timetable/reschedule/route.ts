@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAuth } from "@/lib/supabase-server";
 import { db } from "@/lib/db";
 
 interface RescheduleRequest {

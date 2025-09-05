@@ -21,8 +21,17 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative">
+            <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+            <div className="absolute inset-0 h-12 w-12 rounded-full border-2 border-blue-200"></div>
+          </div>
+          <div className="text-center">
+            <p className="text-lg font-medium text-gray-900">Loading Application</p>
+            <p className="text-sm text-gray-600 mt-1">Please wait while we prepare your dashboard...</p>
+          </div>
+        </div>
       </div>
     );
   }

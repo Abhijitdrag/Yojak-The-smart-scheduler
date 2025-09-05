@@ -1,18 +1,17 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireAuth } from "@/lib/supabase-server";
 import { db } from "@/lib/db";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const { user } = await requireAuth(request, "FACULTY");
     
-    if (!session || session.user.role !== "FACULTY") {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const faculty = await db.facultyProfile.findFirst({
-      where: { userId: session.user.id }
+      where: { userId: user.id }
     });
 
     if (!faculty) {
@@ -38,9 +37,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const { user } = await requireAuth(request, "FACULTY");
     
-    if (!session || session.user.role !== "FACULTY") {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -48,7 +47,7 @@ export async function POST(request: Request) {
     const { action } = body; // "checkin" or "checkout"
 
     const faculty = await db.facultyProfile.findFirst({
-      where: { userId: session.user.id }
+      where: { userId: user.id }
     });
 
     if (!faculty) {

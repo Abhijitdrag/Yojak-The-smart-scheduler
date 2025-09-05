@@ -62,29 +62,34 @@ export default function ApprovalsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-6">
       <Card>
-        <CardHeader className="flex items-center justify-between">
-          <CardTitle>Pending Approvals</CardTitle>
-          <Button variant="outline" onClick={() => router.push("/admin/leave-approvals")}>Leave Approvals</Button>
+        <CardHeader className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <CardTitle className="text-lg sm:text-xl">User Management</CardTitle>
+            <Button variant="outline" onClick={() => router.push("/admin/leave-approvals")} className="w-full sm:w-auto">
+              Leave Approvals
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 sm:p-6">
           <div className="space-y-3">
             {pending.length === 0 ? (
-              <p>No pending users.</p>
+              <p className="text-sm sm:text-base text-center py-4">No pending users.</p>
             ) : (
               pending.map((u) => (
-                <div key={u.id} className="flex items-center justify-between border rounded p-3">
-                  <div>
-                    <div className="font-medium">{u.name || u.email}</div>
-                    <div className="text-sm text-gray-600">{u.email}</div>
+                <div key={u.id} className="flex flex-col sm:flex-row sm:items-center justify-between border rounded p-3 gap-3">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm sm:text-base">{u.name || u.email}</div>
+                    <div className="text-xs sm:text-sm text-gray-600">{u.email}</div>
+                    <div className="text-xs text-gray-500">Status: {u.verificationStatus}</div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
                     <Select
                       onValueChange={(val) => setRoleMap((m) => ({ ...m, [u.id]: val }))}
                       defaultValue={u.role}
                     >
-                      <SelectTrigger className="w-36">
+                      <SelectTrigger className="w-full sm:w-36">
                         <SelectValue placeholder="Role" />
                       </SelectTrigger>
                       <SelectContent>
@@ -93,7 +98,9 @@ export default function ApprovalsPage() {
                         <SelectItem value="ADMIN">ADMIN</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button disabled={loadingAction} onClick={() => approve(u.id)}>Approve</Button>
+                    <Button disabled={loadingAction} onClick={() => approve(u.id)} size="sm" className="w-full sm:w-auto">
+                      {loadingAction ? "Processing..." : "Approve"}
+                    </Button>
                   </div>
                 </div>
               ))

@@ -73,13 +73,13 @@ export default function FacultyPage() {
   };
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-4 sm:p-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Faculty</CardTitle>
+        <CardHeader className="p-4 sm:p-6">
+          <CardTitle className="text-lg sm:text-xl">Faculty</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2">
+        <CardContent className="p-4 sm:p-6">
+          <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             <Input placeholder="Faculty Email" value={form.email} onChange={(e)=>setForm({...form, email:e.target.value})} />
             <Input placeholder="Name (optional)" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} />
             <Select onValueChange={(v)=>setForm({...form, departmentId:v})} value={form.departmentId}>
@@ -92,16 +92,16 @@ export default function FacultyPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={createFaculty}>Add</Button>
+            <Button onClick={createFaculty} className="h-10 sm:h-11">Add</Button>
           </div>
           <div className="space-y-2">
             {rows.length === 0 ? (
-              <p>No faculty found.</p>
+              <p className="text-sm sm:text-base text-center py-4">No faculty found.</p>
             ) : (
               rows.map((r) => (
-                <div key={r.id} className="flex items-center justify-between border rounded p-3">
+                <div key={r.id} className="flex flex-col sm:flex-row sm:items-center justify-between border rounded p-3 gap-2 sm:gap-4">
                   {edit?.userId === r.id ? (
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <Input value={edit.name} onChange={(e)=>setEdit({ ...edit, name: e.target.value })} placeholder="Name" />
                       <Select value={edit.departmentId} onValueChange={(v)=>setEdit({ ...edit, departmentId: v })}>
                         <SelectTrigger>
@@ -114,20 +114,20 @@ export default function FacultyPage() {
                         </SelectContent>
                       </Select>
                       <div className="flex gap-2">
-                        <Button onClick={updateFaculty}>Save</Button>
-                        <Button variant="ghost" onClick={()=>setEdit(null)}>Cancel</Button>
+                        <Button onClick={updateFaculty} size="sm">Save</Button>
+                        <Button variant="ghost" onClick={()=>setEdit(null)} size="sm">Cancel</Button>
                       </div>
                     </div>
                   ) : (
                     <div className="flex-1">
-                      <div className="font-medium">{r.name || r.email}</div>
-                      <div className="text-sm text-gray-600">{r.email}</div>
+                      <div className="font-medium text-sm sm:text-base">{r.name || r.email}</div>
+                      <div className="text-xs sm:text-sm text-gray-600">{r.email}</div>
                     </div>
                   )}
                   {edit?.userId !== r.id && (
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" onClick={()=>setEdit({ userId: r.id, name: r.name || "", departmentId: departments[0]?.id || "" })}>Edit</Button>
-                      <Button variant="destructive" onClick={()=>deleteFaculty(r.id)}>Delete</Button>
+                      <Button variant="outline" onClick={()=>setEdit({ userId: r.id, name: r.name || "", departmentId: departments[0]?.id || "" })} size="sm" className="text-xs sm:text-sm">Edit</Button>
+                      <Button variant="destructive" onClick={()=>deleteFaculty(r.id)} size="sm" className="text-xs sm:text-sm">Delete</Button>
                     </div>
                   )}
                 </div>

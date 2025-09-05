@@ -1,50 +1,40 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { requireAuth } from "@/lib/supabase-server";
+import { db } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
-    const setupTokenHeader = request.headers.get("x-setup-token") || "";
-    const requiredSetupToken = process.env.ADMIN_SETUP_TOKEN || "";
-
-    if (!requiredSetupToken || setupTokenHeader !== requiredSetupToken) {
+    const { user } = await requireAuth(request, "ADMIN");
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { userId, role } = await request.json();
+    const { email, role } = await request.json();
+    
+    if (!email || !role) {
+      return NextResponse.json({ error: "Email and role are required" }, { status: 400 });
+    }
 
-    if (!userId) return NextResponse.json({ error: "userId is required" }, { status: 400 });
-
-    const allowedRoles = ["ADMIN", "FACULTY", "STUDENT"] as const;
-    const targetRole = (role as typeof allowedRoles[number]) || "ADMIN";
-    if (!allowedRoles.includes(targetRole)) {
+    if (!["ADMIN", "FACULTY", "STUDENT"].includes(role)) {
       return NextResponse.json({ error: "Invalid role" }, { status: 400 });
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // server-only
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      return NextResponse.json({ error: "Server not configured: missing Supabase env" }, { status: 500 });
-    }
-
-    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { persistSession: false }
+    const updatedUser = await db.user.update({
+      where: { email },
+      data: { 
+        role: role as any,
+        verificationStatus: role === "ADMIN" ? "APPROVED" : "PENDING"
+      },
     });
 
-    const { data, error } = await adminClient.auth.admin.updateUserById(userId, {
-      user_metadata: {
-        role: targetRole,
-        verificationStatus: "APPROVED",
-        full_name: "Admin"
-      }
+    return NextResponse.json({ 
+      success: true, 
+      user: updatedUser 
     });
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
-    }
-
-    return NextResponse.json({ user: data.user });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Unexpected error" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Promote user error:", error);
+    return NextResponse.json({ 
+      error: error.message || "Failed to promote user" 
+    }, { status: 500 });
   }
 }

@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   description: "Advanced timetable management system for educational institutions with real-time scheduling and NEP 2020 compliance",
   keywords: ["timetable", "scheduler", "education", "NEP 2020", "classroom management"],
   authors: [{ name: "Smart Classroom Team" }],
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   openGraph: {
     title: "Smart Classroom & Timetable Scheduler",
     description: "Advanced timetable management system for educational institutions",
