@@ -10,6 +10,12 @@ function getSupabaseServerClient() {
 
 export async function POST(request: Request) {
   try {
+    // Check if database is available
+    if (!process.env.DATABASE_URL) {
+      console.error("DATABASE_URL not found");
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
+
     const auth = request.headers.get("authorization") || "";
     const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
     if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

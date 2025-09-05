@@ -23,6 +23,12 @@ async function getAuthenticatedPrismaUser(request: Request) {
 
 export async function GET(request: Request) {
   try {
+    // Check if database is available
+    if (!process.env.DATABASE_URL) {
+      console.error("DATABASE_URL not found");
+      return NextResponse.json({ error: "Database not configured" }, { status: 500 });
+    }
+
     const prismaUser = await getAuthenticatedPrismaUser(request);
     if (!prismaUser) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
